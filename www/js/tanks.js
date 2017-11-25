@@ -3,7 +3,8 @@ var INTERVAL = 50;
 var ROTATION_SPEED = 5;
 var ARENA_MARGIN = 30;
 
-function Game(arenaId, w, h, socket){
+function Game(arenaId, w, h, socket, gameId){
+	this.gameId = gameId;
 	this.tanks = []; //Tanks (other than the local tank)
 	this.balls = [];
 	this.width = w;
@@ -74,6 +75,7 @@ Game.prototype = {
 			cannonAngle: this.localTank.cannonAngle
 		};
 		gameData.tank = t;
+		gameData.gameId = this.localTank.gameId;
 		//Client game does not send any info about balls,
 		//the server controls that part
 		this.socket.emit('sync', gameData);

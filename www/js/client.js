@@ -22,11 +22,30 @@ socket.on('removeTank', function(tankId){
 	game.removeTank(tankId);
 });
 
+socket.on('gameCreated', function(game){
+	$('#game-id').text(game.id);
+});
+
 $(document).ready( function(){
+
+	$('#create-game').click( function(){
+		socket.emit('createGame');
+	});
+
+	$('#confirmIdBtn').click( function(){
+		var id = $('#game-id').text;
+		if(id !== ""){
+			$('#game-prompt').hide();
+			$('#prompt').show();
+		}
+	});
+
+	// Developing stage
+	$('#prompt').hide();
 
 	$('#join').click( function(){
 		tankName = $('#tank-name').val();
-		joinGame(tankName, selectedTank, socket);
+		joinGame(tankName, selectedTank, socket,$('#game-id').text());
 	});
 
 	$('#tank-name').keyup( function(e){
@@ -49,9 +68,9 @@ $(window).on('beforeunload', function(){
 	socket.emit('leaveGame', tankName);
 });
 
-function joinGame(tankName, tankType, socket){
-	if(tankName != ''){
+function joinGame(tankName, tankType, socket, gameId){
+	if(tankName != '' && gameId != ''){
 		$('#prompt').hide();
-		socket.emit('joinGame', {name: tankName, type: tankType});
+		socket.emit('joinGame', {name: tankName, type: tankType, gameId: gameId});
 	}
 }

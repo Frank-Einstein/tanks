@@ -1,4 +1,6 @@
 var express = require('express');
+var mongoClient = require('mongodb').MongoClient;
+var assert = require('assert');
 var app = express();
 var counter = 0;
 var BALL_SPEED = 10;
@@ -9,6 +11,14 @@ var TANK_INIT_HP = 100;
 //Static resources server
 app.use(express.static(__dirname + '/www'));
 
+//Connect to running mongodb instance
+var url = 'mongodb://localhost:27017/test';
+mongoClient.connect(url, function(err, db){
+	assert.equal(null, err);
+	console.log('Connected successfully to mongodb server');
+	db.close();
+});
+
 var server = app.listen(process.env.PORT || 8082, function () {
 	var port = server.address().port;
 	console.log('Server running at port %s', port);
@@ -17,6 +27,7 @@ var server = app.listen(process.env.PORT || 8082, function () {
 var io = require('socket.io')(server);
 
 function GameServer(){
+	this.id = '';
 	this.tanks = [];
 	this.balls = [];
 	this.lastBallId = 0;
@@ -132,15 +143,21 @@ io.on('connection', function(client) {
 	console.log('User connected');
 
 	client.on('joinGame', function(tank){
-		console.log(tank.name + ' joined the game');
-		var initX = getRandomInt(40, 900);
+		client.join(tank.gameId);
+		console.log(tank.name + ' joined game: ' + tank.gameId);
+		var initX = getRandomInt(40, WIDTH - 100);
 		var initY = getRandomInt(40, 500);
 		var tankId = guid();
 
 		client.emit('addTank', { id: tankId, name: tank.name, type: tank.type, isLocal: true, x: initX, y: initY, hp: TANK_INIT_HP });
-		client.broadcast.emit('addTank', { id: tankId, name: tank.name, type: tank.type, isLocal: false, x: initX, y: initY, hp: TANK_INIT_HP} );
+		client.to(tank.gameId).broadcast.emit('addTank', { id: tankId, name: tank.name, type: tank.type, isLocal: false, x: initX, y: initY, hp: TANK_INIT_HP} );
 
 		game.addTank({ id: tankId, name: tank.name, type: tank.type, hp: TANK_INIT_HP});
+	});
+
+	client.on('createGame', function(){
+		var gameId = getGameId();
+		client.emit('gameCreated', {id : gameId});
 	});
 
 	client.on('sync', function(data){
@@ -152,7 +169,7 @@ io.on('connection', function(client) {
 		game.syncBalls();
 		//Broadcast data to clients
 		client.emit('sync', game.getData());
-		client.broadcast.emit('sync', game.getData());
+		client.to(data.gameId).broadcast.emit('sync', game.getData());
 
 		//I do the cleanup after sending data, so the clients know
 		//when the tank dies and when the balls explode
@@ -198,4 +215,16 @@ Ball.prototype = {
 
 function getRandomInt(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function getGameId(){
+	var newGameId = getRandomInt(10000000, 99999999);
+	if(checkId(newGameId)){
+		return newGameId;
+	}
+}
+
+function checkId(id){
+	//TODO check if id already is in use
+	return true;
 }

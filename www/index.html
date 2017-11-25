@@ -16,10 +16,30 @@
 	<link rel="shortcut icon" href="img/icon.png">
 
 </head>
-<body>
+<body style="height: auto">
 	<!--[if lt IE 7]>
 	<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 	<![endif]-->
+
+	<div id="game-prompt" class="name-prompt">
+		<div class="input-group">
+			<span class="input-group-btn">
+				<input id="create-game" class="btn btn-primary" type="submit" value="Create game" style="width: 100%; border-radius: 5px;">
+			</span>
+		</div>
+		<div class="input-group">
+			<input id="join-game-id" type="text" class="form-control" placeholder="Insert game id" autocomplete="off">
+			<span class="input-group-btn">
+				<input id="join-game" class="btn btn-primary" type="submit" value="Join game">
+			</span>
+		</div>
+		<div class="input-group" id="confirmId">
+				<Span id="game-id"></Span>
+				<span class="input-group-btn">
+					<input id="confirmIdBtn" class="btn btn-primary" type="submit" value="Ok">
+				</span>
+			</div>
+	</div>
 
 	<div id="prompt" class="name-prompt">
 		<div class="input-group">
@@ -44,8 +64,16 @@
     	</div>
 	</div>
 
-	<div id="arena" class="arena">
+	<div class="" style="display: flex; flex: auto" layout="row">
+			<div flex id="arena" class="arena">
+			</div>
+			<div flex id="js-input" class="code-input">
+					<textarea spellcheck="false" class="text-input"; name="javascript code">/* Add your robot code here */
+
+					</textarea>
+			</div>
 	</div>
+
 	
 	
 	<script type="text/javascript" src="js/jquery.min.js"></script>
