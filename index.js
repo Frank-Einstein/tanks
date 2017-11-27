@@ -7,16 +7,17 @@ var BALL_SPEED = 10;
 var WIDTH = 1100;
 var HEIGHT = 580;
 var TANK_INIT_HP = 100;
+var db;
 
 //Static resources server
 app.use(express.static(__dirname + '/www'));
 
 //Connect to running mongodb instance
 var url = 'mongodb://localhost:27017/test';
-mongoClient.connect(url, function(err, db){
+mongoClient.connect(url, function(err, database){
 	assert.equal(null, err);
 	console.log('Connected successfully to mongodb server');
-	db.close();
+	db = database;
 });
 
 var server = app.listen(process.env.PORT || 8082, function () {
@@ -34,6 +35,10 @@ function GameServer(){
 }
 
 GameServer.prototype = {
+
+	setId: function(id){
+		this.id = id;
+	},
 
 	addTank: function(tank){
 		this.tanks.push(tank);
@@ -153,10 +158,17 @@ io.on('connection', function(client) {
 		client.to(tank.gameId).broadcast.emit('addTank', { id: tankId, name: tank.name, type: tank.type, isLocal: false, x: initX, y: initY, hp: TANK_INIT_HP} );
 
 		game.addTank({ id: tankId, name: tank.name, type: tank.type, hp: TANK_INIT_HP});
+
+		db.collection('tankGame').update({'id':tank.gameId}, {$set:{'tanks':game.tanks}});
 	});
 
 	client.on('createGame', function(){
 		var gameId = getGameId();
+		game = new GameServer();
+		game.setId(gameId);
+		
+		db.collection('tankGame').insert(game);
+		
 		client.emit('gameCreated', {id : gameId});
 	});
 
@@ -189,6 +201,9 @@ io.on('connection', function(client) {
 		client.broadcast.emit('removeTank', tankId);
 	});
 
+	client.on('disconnect', function(){
+
+	});
 });
 
 function Ball(ownerId, alpha, x, y){

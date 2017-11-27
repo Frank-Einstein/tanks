@@ -37,6 +37,14 @@ body{
 	background-color: rgb(20, 20, 20);
 }
 
+.game-id-input{
+	font-size: 2rem;
+}
+
+.form-control[disabled] {
+	cursor: default;
+}
+
 .tank{
 	position: absolute;
 	background-repeat: no-repeat;

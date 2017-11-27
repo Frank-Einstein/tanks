@@ -23,7 +23,7 @@ socket.on('removeTank', function(tankId){
 });
 
 socket.on('gameCreated', function(game){
-	$('#game-id').text(game.id);
+	$('#game-id').val('Game id: ' + game.id);
 });
 
 $(document).ready( function(){
@@ -33,7 +33,7 @@ $(document).ready( function(){
 	});
 
 	$('#confirmIdBtn').click( function(){
-		var id = $('#game-id').text;
+		var id = $('#game-id').val().split(' ')[2];
 		if(id !== ""){
 			$('#game-prompt').hide();
 			$('#prompt').show();
@@ -45,7 +45,7 @@ $(document).ready( function(){
 
 	$('#join').click( function(){
 		tankName = $('#tank-name').val();
-		joinGame(tankName, selectedTank, socket,$('#game-id').text());
+		joinGame(tankName, selectedTank, socket,$('#game-id').val().split(' ')[2]);
 	});
 
 	$('#tank-name').keyup( function(e){
